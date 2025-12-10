@@ -8,7 +8,8 @@ class OcrOptions(BaseModel):
 class OcrRequest(BaseModel):
     jobId: str
     pageId: str
-    imageUrl: str
+    imageUrl: Optional[str] = None
+    imageBase64: Optional[str] = None
     options: OcrOptions = OcrOptions()
     
 class LayoutBlock(BaseModel):

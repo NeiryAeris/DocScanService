@@ -16,8 +16,4 @@ router.use(authMiddleware);
 // router.delete("/:id", pagesController.deletePage);
 // router.post("/:pageId/ocr", pagesController.ocrPage);
 
-router.post(
-  "/:pageId/ocr",
-  upload.single("image"),   // 👈 field name = "image"
-  pagesController.ocrPage
-);
+router.post("/:pageId/ocr", upload.single("image"), pagesController.ocrPage);

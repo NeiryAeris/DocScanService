@@ -10,8 +10,21 @@ router = APIRouter(
 )
 
 @router.post('/ocr', response_model=OcrResponse)
-def ocr_endpoint(req: OcrRequest) -> OcrResponse:
+def ocr_endpoint(body: OcrRequest) -> OcrResponse:
     """
-    Internal endpoint to run OCR on a given image URL.
+    Internal OCR endpoint, called only by the Node.js gateway.
+
+    Expected payload (from Node):
+
+    {
+      "jobId": "job_test-page-1",
+      "pageId": "test-page-1",
+      "imageBase64": "...",          # base64 of uploaded image
+      "imageUrl": null,              # optional, future
+      "options": {
+        "languages": ["vi", "en"],
+        "returnLayout": true
+      }
+    }
     """
-    return run_ocr(req)
+    return run_ocr(body)

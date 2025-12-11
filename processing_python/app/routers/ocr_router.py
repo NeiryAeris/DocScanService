@@ -22,7 +22,7 @@ def ocr_endpoint(body: OcrRequest) -> OcrResponse:
       "imageBase64": "...",          # base64 of uploaded image
       "imageUrl": null,              # optional, future
       "options": {
-        "languages": ["vi", "en"],
+        "languages": ["vie", "eng"],
         "returnLayout": true
       }
     }

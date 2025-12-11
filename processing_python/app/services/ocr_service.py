@@ -4,66 +4,47 @@ import io
 from PIL import Image
 from ..models.ocr_schema import OcrRequest, OcrResponse
 from ..utils import logger
+from .ocr_pipline import run_ocr_image_bytes, run_ocr_image_base64
 
 def run_ocr(req: OcrRequest) -> OcrResponse:
     """
-    Dummy OCR implementation for smoke testing.
+    This is what /internal/ocr calls.
 
-    Current behaviour:
-    - If imageBase64 is present, validate it as base64 (do NOT actually OCR yet).
-    - If imageUrl is present (future use), just log it.
-    - Always return a fake OCR text on success.
-    - On any exception, return status="error" and do NOT crash FastAPI.
-
-    This is intentionally simple so the full pipeline
-    Android -> Node -> Python works reliably.
-    Later you can plug in real OCR engine here.
+    Uses the OCR pipeline built from your CLI text logic.
     """
     try:
-        # --- handle image data (just validate base64 for now) ---
-        if req.imageBase64:
-            # Validate base64 (will throw if invalid)
-            decoded = base64.b64decode(req.imageBase64, validate=True)
-            logger.info(
-                "Received base64 image for OCR",
-                {"pageId": req.pageId, "bytes": len(decoded)},
+        if not req.imageBase64:
+            return OcrResponse(
+                jobId=req.jobId,
+                status="error",
+                text="",
+                language="",
+                confidence=0.0,
+                layout=None,
+                error="No imageBase64 provided",
             )
-        elif req.imageUrl:
-            # Future: download from URL and OCR
-            logger.info(
-                "Received imageUrl for OCR (not used yet)",
-                {"pageId": req.pageId, "url": req.imageUrl},
-            )
-        else:
-            logger.info("No image data provided for OCR", {"pageId": req.pageId})
 
-        # --- choose language robustly ---
-        chosen_lang = "en"
-        opts = req.options
+        languages = req.options.languages or ["vie", "eng"]
 
-        if getattr(opts, "languages", None):
-            # if it's a list and not empty
-            langs = opts.languages or []
-            if isinstance(langs, list) and len(langs) > 0:
-                chosen_lang = langs[0]
-        elif getattr(opts, "language", None):
-            chosen_lang = opts.language or "en"
+        result = run_ocr_image_base64(req.imageBase64, languages)
 
-        fake_text = f"[DUMMY OCR] Processed page {req.pageId}"
-
+        # TODO: compute real confidence from boxes if you want
         return OcrResponse(
             jobId=req.jobId,
             status="success",
-            text=fake_text,
-            language=chosen_lang,
+            text=result["text"],
+            language=result["language"],
             confidence=0.99,
-            layout=None,
+            layout={
+                "tokens": result["tokens"],
+                "tokenPositions": result["tokenPositions"],
+                "boxes": result["boxes"],
+            },
             error=None,
         )
 
     except Exception as e:
-        # Catch all exceptions so FastAPI doesn't return 500 to Node
-        logger.error("Error in run_ocr", {"error": str(e), "jobId": req.jobId})
+        logger.error(f"Error in run_ocr: {e}")
         return OcrResponse(
             jobId=req.jobId,
             status="error",

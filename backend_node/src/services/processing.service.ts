@@ -16,7 +16,7 @@ export const ocrPage = async (input: OcrPageInput): Promise<{ text: string }> =>
         imageUrl,     // optional for future
         imageBase64,  // actual raw image for now
         options: {
-        languages: ["vi", "en"],
+        languages: ["vie", "eng"],
         returnLayout: true
     }
   };

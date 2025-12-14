@@ -18,5 +18,9 @@ app.include_router(qa_router.router)
 def root():
     return {"message": "Document Processing Service is running."}
 
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
+
 def start():
     logger.info(f"Starting DocScan Processing Service on port {PYTHON_SERVICE_PORT}")

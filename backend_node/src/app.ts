@@ -20,8 +20,7 @@ export const createApp = (): Application => {
 
     // heath root
     app.get("/", (req, res) => {
-        res.status(200).send("DocScan Service is running...");
-        res.json({ status: "OK", message: "DocScan Service Gateway is running" });
+        res.status(200).json({ status: "OK", message: "DocScan Service Gateway is running" });
     })
 
     // error handler

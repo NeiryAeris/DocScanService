@@ -4,3 +4,5 @@ python-dotenv
 httpx
 pydantic
 pillow
+pytesseract
+python-multipart

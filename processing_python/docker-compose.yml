@@ -1,0 +1,8 @@
+services:
+  processing:
+    build: .
+    ports:
+      - "8001:8001"
+    environment:
+      - TESSERACT_CMD=tesseract
+      - TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata

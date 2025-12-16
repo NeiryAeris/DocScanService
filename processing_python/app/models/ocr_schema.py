@@ -2,8 +2,11 @@ from pydantic import BaseModel
 from typing import List, Optional, Any
 
 class OcrOptions(BaseModel):
-    languages: List[str] = "en"
+    languages: List[str] = ["eng"]
     returnLayout: bool = True
+    
+    psm: int = 6
+    oem: int = 1
     
 class OcrRequest(BaseModel):
     """

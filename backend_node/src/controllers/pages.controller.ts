@@ -2,8 +2,7 @@ import { Request, Response } from "express";
 import * as processingService from "../services/processing.service";
 
 export const ocrPage = async (req: Request, res: Response) => {
-  // @ts-expect-error user added by middleware
-  const userId: string = req.user.id;
+  const userId = (req as any).user?.id as string | undefined;
   const { pageId } = req.params;
 
   const file = req.file;

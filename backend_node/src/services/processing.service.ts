@@ -1,7 +1,7 @@
 import {pythonClient} from "../integrations/python.client";
 
 interface OcrPageInput {
-  userId: string;
+  userId?: string;
   pageId: string;
   imageBase64?: string;
   imageUrl?: string;

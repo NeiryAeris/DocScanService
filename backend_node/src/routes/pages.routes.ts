@@ -17,7 +17,7 @@ const upload = multer({
   }
 });
 
-router.use(authMiddleware);
+// router.use(authMiddleware);
 
 // router.post("/", pagesController.createPage);
 // router.get("/", pagesController.getPages);

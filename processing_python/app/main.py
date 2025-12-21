@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .api.v1.routers import ocr_router, handwriting_router, qa_router
+from .api.v1.routers import chat_routes, handwriting_routes, ocr_routes
 from .core.config import PYTHON_SERVICE_PORT
 from .utils import logger
 
@@ -15,9 +15,9 @@ app = FastAPI(
 )
 
 # Routers
-app.include_router(ocr_router.router)
-app.include_router(handwriting_router.router)
-app.include_router(qa_router.router)
+app.include_router(ocr_routes.router)
+app.include_router(handwriting_routes.router)
+app.include_router(chat_routes.router)
 
 
 # -----------------------------

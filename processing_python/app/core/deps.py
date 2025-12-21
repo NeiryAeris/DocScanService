@@ -1,5 +1,5 @@
 from fastapi import Header, HTTPException, status
-from .core.config import INTERNAL_TOKEN
+from .config import INTERNAL_TOKEN
 
 async def verify_internal_token(x_internal_token: str = Header(...)):
     if x_internal_token != INTERNAL_TOKEN:

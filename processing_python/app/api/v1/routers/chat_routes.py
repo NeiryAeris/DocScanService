@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
-from ..dependencies import verify_internal_token
-from ..models.qa_schema import QaRequest, QaResponse
-from ..services.qa_service import answer_question
+from ....core.deps import verify_internal_token
+from ....schemas.chat import QaRequest, QaResponse
+from ....services.qa_service import answer_question
 
 router = APIRouter(
     prefix="/internal",

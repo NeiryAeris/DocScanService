@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
-from ..dependencies import verify_internal_token
-from ..models.ocr_schema import OcrRequest, OcrResponse
-from ..services.ocr_service import run_ocr
+
+from ....core.deps import verify_internal_token
+from ....schemas.ocr import OcrRequest, OcrResponse
+from ....services.ocr_service import run_ocr
 
 router = APIRouter(
     prefix='/internal',

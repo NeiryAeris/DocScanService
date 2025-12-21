@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .api.v1.routers import chat_routes, handwriting_routes, ocr_routes
+from .api.v1.routers.router import router as v1_router
 from .core.config import PYTHON_SERVICE_PORT
 from .utils import logger
 
@@ -15,10 +15,7 @@ app = FastAPI(
 )
 
 # Routers
-app.include_router(ocr_routes.router)
-app.include_router(handwriting_routes.router)
-app.include_router(chat_routes.router)
-
+app.include_router(v1_router)
 
 # -----------------------------
 # Tesseract configuration + checks

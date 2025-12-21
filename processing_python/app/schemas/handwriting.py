@@ -13,6 +13,5 @@ class HandwritingRequest(BaseModel):
 class HandwritingResponse(BaseModel):
     jobId: str
     status: str
-    text: str
-    confidence: float
+    cleanImageUrl: Optional[str] = None
     error: Optional[str] = None

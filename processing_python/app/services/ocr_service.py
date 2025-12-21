@@ -7,7 +7,7 @@ import subprocess
 import tempfile
 from typing import List, Optional, Tuple, Union
 
-from ..models.ocr_schema import OcrRequest, OcrResponse
+from ..schemas.ocr import OcrRequest, OcrResponse
 from ..utils import logger
 
 

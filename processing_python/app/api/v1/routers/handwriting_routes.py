@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
-from ..dependencies import verify_internal_token
-from ..models.handwriting_schema import HandwritingRequest, HandwritingResponse
-from ..services.handwriting_service import remove_handwriting
+
+from ....core.deps import verify_internal_token
+from ....schemas.handwriting import HandwritingRequest, HandwritingResponse
+from ....services.handwriting_service import remove_handwriting
 
 router = APIRouter(
     prefix='/internal',

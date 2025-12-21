@@ -6,3 +6,7 @@ pydantic
 pillow
 pytesseract
 python-multipart
+qdrant-client
+langchain
+langchain-google-genai
+langchain-core

@@ -6,3 +6,10 @@ services:
     environment:
       - TESSERACT_CMD=tesseract
       - TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    volumes:
+      - ./qdrant_storage:/qdrant/storage

@@ -22,3 +22,19 @@ if not _token:
         print("[WARN] INTERNAL_TOKEN not set; using dev-internal-token")
 else:
     INTERNAL_TOKEN = _token
+    
+    
+# Gemini
+GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+# GEMINI_CHAT_MODEL: str = os.getenv("GEMINI_CHAT_MODEL", "gemini-1.5-flash")
+# GEMINI_EMBED_MODEL: str = os.getenv("GEMINI_EMBED_MODEL", "text-embedding-004")
+
+# Qdrant
+QDRANT_URL: str = os.getenv("QDRANT_URL", "")
+QDRANT_API_KEY: str = os.getenv("QDRANT_API_KEY", "")  # optional
+QDRANT_COLLECTION: str = os.getenv("QDRANT_COLLECTION", "doc_chunks")
+
+# RAG knobs
+TOP_K: int = int(os.getenv("TOP_K", "8"))
+CHUNK_SIZE: int = int(os.getenv("CHUNK_SIZE", "1200"))       # chars (simple MVP)
+CHUNK_OVERLAP: int = int(os.getenv("CHUNK_OVERLAP", "150"))  # chars

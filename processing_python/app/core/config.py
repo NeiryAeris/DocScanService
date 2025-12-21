@@ -26,8 +26,8 @@ else:
     
 # Gemini
 GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
-# GEMINI_CHAT_MODEL: str = os.getenv("GEMINI_CHAT_MODEL", "gemini-1.5-flash")
-# GEMINI_EMBED_MODEL: str = os.getenv("GEMINI_EMBED_MODEL", "text-embedding-004")
+GEMINI_CHAT_MODEL: str = os.getenv("GEMINI_CHAT_MODEL", "gemini-2.5-flash")
+GEMINI_EMBED_MODEL: str = os.getenv("GEMINI_EMBED_MODEL","")
 
 # Qdrant
 QDRANT_URL: str = os.getenv("QDRANT_URL", "")

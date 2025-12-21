@@ -1,7 +1,7 @@
+# app/pipelines/indexer.py
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
-
 from app.pipelines.chunk import PageText, chunk_pages
 
 
@@ -12,7 +12,18 @@ class Indexer:
         self.chunk_size = chunk_size
         self.overlap = overlap
 
-    def upsert_ocr(self, user_id: str, doc_id: str, pages: List[PageText], title: Optional[str] = None) -> Dict[str, Any]:
+    def upsert_ocr(
+        self,
+        user_id: str,
+        doc_id: str,
+        pages: List[PageText],
+        title: Optional[str] = None,
+        replace: bool = True,   # ✅ new
+    ) -> Dict[str, Any]:
+        # ✅ Make indexing idempotent
+        if replace:
+            self.store.delete_doc(user_id=user_id, doc_id=doc_id)
+
         chunks = chunk_pages(pages, chunk_size=self.chunk_size, overlap=self.overlap)
         texts = [c["text"] for c in chunks]
         vectors = self.gemini.embed_documents(texts)
@@ -29,4 +40,4 @@ class Indexer:
             })
 
         count = self.store.upsert(vectors=vectors, payloads=payloads)
-        return {"indexed": True, "chunks": count}
+        return {"indexed": True, "chunks": count, "replaced": replace}

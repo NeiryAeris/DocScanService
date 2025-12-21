@@ -25,6 +25,7 @@ class PageIn(BaseModel):
 class UpsertOcrIn(BaseModel):
     doc_id: str
     title: Optional[str] = None
+    replace: bool = True
     pages: List[PageIn]
 
 @router.post("/upsert_ocr")
@@ -51,4 +52,10 @@ def upsert_ocr(
     )
 
     pages = [PageText(p.page_number, p.text) for p in body.pages]
-    return indexer.upsert_ocr(user_id=x_user_id, doc_id=body.doc_id, title=body.title, pages=pages)
+    return indexer.upsert_ocr(
+        user_id=x_user_id,
+        doc_id=body.doc_id,
+        title=body.title,
+        pages=pages,
+        replace=body.replace,
+    )

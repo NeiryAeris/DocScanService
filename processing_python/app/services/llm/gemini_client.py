@@ -1,38 +1,61 @@
 # app/services/llm/gemini_client.py
 from __future__ import annotations
+
 from typing import List, Optional
 
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from langchain_core.messages import HumanMessage
-
-try:
-    from langchain_google_genai import ChatGoogleGenerativeAI
-except Exception:
-    ChatGoogleGenerativeAI = None
+from google import genai
+from google.genai import types
 
 
 class GeminiClient:
-    def __init__(self, api_key: str, embed_model: str, chat_model: Optional[str] = None):
+    def __init__(
+        self,
+        api_key: str,
+        embed_model: str,
+        chat_model: Optional[str] = None,
+        embed_dims: Optional[int] = None,  # optional: reduce vector size (e.g., 768/1536)
+    ):
         if not api_key:
             raise RuntimeError("GEMINI_API_KEY is missing")
 
-        self._emb = GoogleGenerativeAIEmbeddings(model=embed_model, google_api_key=api_key)
-        self._chat = None
-
-        # Only initialize chat if you actually provide a model name
-        if chat_model:
-            if ChatGoogleGenerativeAI is None:
-                raise RuntimeError("ChatGoogleGenerativeAI not available. Install langchain-google-genai.")
-            self._chat = ChatGoogleGenerativeAI(model=chat_model, google_api_key=api_key)
+        self._client = genai.Client(api_key=api_key)
+        self._embed_model = embed_model
+        self._chat_model = chat_model
+        self._embed_dims = embed_dims
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        return self._emb.embed_documents(texts)
+        if not texts:
+            return []
+
+        cfg = types.EmbedContentConfig(output_dimensionality=self._embed_dims) if self._embed_dims else None
+
+        # google-genai supports list input via `contents=[...]`
+        resp = self._client.models.embed_content(
+            model=self._embed_model,
+            contents=texts,
+            config=cfg,
+        )
+
+        embs = []
+        for e in resp.embeddings:
+            values = getattr(e, "values", e)
+            embs.append(list(values))
+        return embs
 
     def embed_query(self, text: str) -> List[float]:
-        return self._emb.embed_query(text)
+        vecs = self.embed_documents([text])
+        return vecs[0] if vecs else []
 
     def generate_text(self, prompt: str) -> str:
-        if not self._chat:
+        if not self._chat_model:
             raise RuntimeError("Chat model not configured (set GEMINI_CHAT_MODEL).")
-        resp = self._chat.invoke([HumanMessage(content=prompt)])
-        return getattr(resp, "content", str(resp))
+
+        resp = self._client.models.generate_content(
+            model=self._chat_model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.2,
+                max_output_tokens=512,
+            ),
+        )
+        return resp.text or ""

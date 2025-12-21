@@ -46,12 +46,25 @@ class QdrantStore:
         self.client.upsert(collection_name=self.collection, points=points)
         return len(points)
 
-    def search(self, query_vector: List[float], user_id: str, doc_ids: Optional[List[str]], top_k: int):
+    def search(self, query_vector, user_id: str, doc_ids, top_k: int):
         must = [qm.FieldCondition(key="user_id", match=qm.MatchValue(value=user_id))]
         if doc_ids:
             must.append(qm.FieldCondition(key="doc_id", match=qm.MatchAny(any=doc_ids)))
         flt = qm.Filter(must=must)
 
+        # Newer clients: query_points()
+        if hasattr(self.client, "query_points"):
+            res = self.client.query_points(
+                collection_name=self.collection,
+                query=query_vector,
+                query_filter=flt,
+                limit=top_k,
+                with_payload=True,
+            )
+            # Different versions return different shapes: normalize to a list of ScoredPoint
+            return getattr(res, "points", getattr(res, "result", res))
+
+        # Older clients: search()
         return self.client.search(
             collection_name=self.collection,
             query_vector=query_vector,
@@ -59,7 +72,7 @@ class QdrantStore:
             with_payload=True,
             query_filter=flt,
         )
-
+        
     def delete_doc(self, user_id: str, doc_id: str):
         flt = qm.Filter(
             must=[

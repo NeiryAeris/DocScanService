@@ -27,6 +27,9 @@ class UpsertOcrIn(BaseModel):
     title: Optional[str] = None
     replace: bool = True
     pages: List[PageIn]
+    
+class DeleteDocIn(BaseModel):
+    doc_id: str
 
 @router.post("/upsert_ocr")
 def upsert_ocr(
@@ -59,3 +62,16 @@ def upsert_ocr(
         pages=pages,
         replace=body.replace,
     )
+
+@router.post("/delete_doc")
+def delete_doc(
+    body: DeleteDocIn,
+    x_user_id: str = Header(..., alias="X-User-Id"),
+):
+    store = QdrantStore(
+        url=config.QDRANT_URL,
+        api_key=config.QDRANT_API_KEY,
+        collection=config.QDRANT_COLLECTION,
+    )
+    store.delete_doc(user_id=x_user_id, doc_id=body.doc_id)
+    return {"deleted": True, "doc_id": body.doc_id}

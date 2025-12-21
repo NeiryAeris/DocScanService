@@ -34,7 +34,7 @@ def upsert_ocr(
 ):
     gemini = GeminiClient(
         api_key=config.GEMINI_API_KEY,
-        chat_model=config.GEMINI_CHAT_MODEL,
+        chat_model=None,
         embed_model=config.GEMINI_EMBED_MODEL,
     )
     store = QdrantStore(

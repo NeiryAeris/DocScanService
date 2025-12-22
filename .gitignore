@@ -139,3 +139,4 @@ dist
 *.pyc
 processing_python/check.py
 **/qdrant_storage/
+backend_node/firebase_admin.json

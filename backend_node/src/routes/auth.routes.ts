@@ -1,13 +1,14 @@
 import { Router } from "express";
 import * as authController from "../controllers/auth.controller";
+import { firebaseAuthMiddleware } from "../middlewares/firebase_auth.middleware";
 
 export const router = Router();
 
 router.post("/login", authController.login);
-// router.post("/register", authController.register);
-// router.post("/logout", authController.logout);
-// router.post("/refresh-token", authController.refreshToken);
-// router.post("/forgot-password", authController.forgotPassword);
-// router.post("/reset-password", authController.resetPassword);
-// router.get("/verify-email", authController.verifyEmail);
 router.get("/me", authController.me);
+
+// ✅ Firebase token test
+router.get("/firebase/me", firebaseAuthMiddleware, (req, res) => {
+  // @ts-expect-error attached by middleware
+  res.json({ user: req.user });
+});

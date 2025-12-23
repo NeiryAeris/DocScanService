@@ -19,12 +19,12 @@ export const createDocument = async (req: Request, res: Response) => {
 }
 
 export const getDocumentById = async (req: Request, res: Response) => {
-    // @ts-expect-error added in middleware
-    const userId: string = req.user.id;
-    const { id } = req.params;
+  // @ts-expect-error added in middleware
+  const userId: string = req.user.id;
+  const { id } = req.params;
 
-    const doc = await documentService.getDocumentById(userId,id);
-    if (!doc) {
-        return res.status(404).json({ message: "Document not found" });
-    }
+  const doc = await documentService.getDocumentById(userId, id);
+  if (!doc) return res.status(404).json({ message: "Document not found" });
+
+  return res.json({ document: doc });
 };

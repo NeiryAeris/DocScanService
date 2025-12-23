@@ -8,6 +8,7 @@ class TransUNetWrapper(nn.Module):
     def __init__(self, img_size: int, num_classes: int = 3, pretrained_model_name: str = "R50-ViT-B_16",
                  num_skip_channels: int = 3, vit_patch_size: int = 16):
         super().__init__()
+        self.img_size = img_size
         cfg = VIT_CONFIGS[pretrained_model_name]
         cfg.n_classes = num_classes
         cfg.n_skip = num_skip_channels

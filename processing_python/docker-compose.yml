@@ -6,6 +6,11 @@ services:
     environment:
       - TESSERACT_CMD=tesseract
       - TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
+      - HW_SEGMENTER_CKPT=/workspace/weights/segmenter/segmenter.ckpt
+      - HW_INPAINT_WEIGHTS=/workspace/weights/inpaint/lbam.pth
+    volumes:
+      - ./weights:/workspace/weights
+      
 
   qdrant:
     image: qdrant/qdrant:latest

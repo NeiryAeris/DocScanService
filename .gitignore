@@ -140,3 +140,11 @@ dist
 processing_python/check.py
 **/qdrant_storage/
 backend_node/firebase_admin.json
+
+
+# model weights
+weights/
+*.ckpt
+*.pth
+*.pt
+*.onnx

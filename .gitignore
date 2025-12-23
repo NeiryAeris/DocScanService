@@ -156,3 +156,4 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+processing_python/test/clean.png

@@ -1,4 +1,5 @@
 import admin from "firebase-admin";
+import { env } from "../config/env";
 
 function loadServiceAccount() {
   const b64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;

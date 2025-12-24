@@ -17,3 +17,4 @@ pyyaml
 tqdm
 opencv-python-headless
 ml-collections
+pypdf

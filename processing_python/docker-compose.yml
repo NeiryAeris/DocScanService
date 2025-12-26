@@ -8,9 +8,18 @@ services:
       - TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
       - HW_SEGMENTER_CKPT=/workspace/weights/segmenter/segmenter.ckpt
       - HW_INPAINT_WEIGHTS=/workspace/weights/inpaint/lbam.pth
+
+      # MUST match gateway PYTHON_INTERNAL_TOKEN
+      - INTERNAL_TOKEN=super-secret-dev-token
+
+      # IMPORTANT when running in docker
+      - QDRANT_URL=http://qdrant:6333
+
+      # If your indexing uses embeddings
+      - GEMINI_API_KEY=YOUR_GEMINI_KEY
+      - GEMINI_EMBED_MODEL=gemini-embedding-001
     volumes:
       - ./weights:/workspace/weights
-      
 
   qdrant:
     image: qdrant/qdrant:latest

@@ -4,7 +4,7 @@ import path from "path";
 import { exec } from "child_process";
 
 const GW = process.env.GW_BASE_URL || "http://127.0.0.1:4000/api";
-const RAW = process.env.TEST_FIREBASE_ID_TOKEN || "";
+const RAW = process.env.ID_TOKEN || "";
 const IDTOKEN = RAW.trim().replace(/^Bearer\s+/i, "");
 const DEFAULT_FILE = process.env.TEST_UPLOAD_PATH || "";
 const AUTO_OPEN = (process.env.AUTO_OPEN_BROWSER || "true").toLowerCase() === "true";

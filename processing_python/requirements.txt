@@ -7,14 +7,9 @@ pillow
 pytesseract
 python-multipart
 qdrant-client
-langchain
-langchain-google-genai
-langchain-core
 torch
 torchvision
 numpy
-pyyaml
-tqdm
-opencv-python-headless
 ml-collections
 pypdf
+google-genai

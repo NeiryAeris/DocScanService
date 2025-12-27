@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, Header, HTTPException, status
 from .api.v1.routers.router import router as v1_router
-from .core.config import PYTHON_SERVICE_PORT
+from .core.config import PYTHON_SERVICE_PORT, ENV
+from .core.deps import verify_internal_token
 from .utils import logger
 
 import os
@@ -116,6 +117,28 @@ else:
 # Routes
 # -----------------------------
 
+def _is_prod() -> bool:
+    return ENV.lower() in ("prod", "production")
+
+
+async def _debug_guard(
+    x_internal_token: Optional[str] = Header(default=None, alias="X-Internal-Token"),
+):
+    """
+    In production, protect diagnostic endpoints with X-Internal-Token.
+    In dev/test, allow without auth for easier debugging.
+    """
+    if not _is_prod():
+        return
+
+    if not x_internal_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid internal token",
+        )
+
+    await verify_internal_token(x_internal_token=x_internal_token)
+
 @app.get("/")
 def root():
     return {"message": "Document Processing Service is running."}
@@ -127,7 +150,7 @@ def health_check():
     return {"status": "healthy"}
 
 
-@app.get("/health/tesseract")
+@app.get("/health/tesseract", dependencies=[Depends(_debug_guard)])
 def health_tesseract():
     """
     Detailed diagnostic endpoint to see what the service process can access.
@@ -143,7 +166,7 @@ def health_tesseract():
 # Optional: expose what command your OCR router should use
 # so you can import it there: from .main import TESSERACT_CMD
 # (If circular imports happen, move this into a shared config module.)
-@app.get("/debug/tesseract-cmd")
+@app.get("/debug/tesseract-cmd", dependencies=[Depends(_debug_guard)])
 def debug_tesseract_cmd():
     return {"TESSERACT_CMD": TESSERACT_CMD}
 

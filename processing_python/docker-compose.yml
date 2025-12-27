@@ -1,25 +1,23 @@
 services:
   processing:
     build: .
+    image: docscan-processing:latest
     ports:
       - "8001:8001"
+    env_file:
+      - ./.env
     environment:
       - TESSERACT_CMD=tesseract
       - TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
       - HW_SEGMENTER_CKPT=/workspace/weights/segmenter/segmenter.ckpt
       - HW_INPAINT_WEIGHTS=/workspace/weights/inpaint/lbam.pth
 
-      # MUST match gateway PYTHON_INTERNAL_TOKEN
-      - INTERNAL_TOKEN=super-secret-dev-token
-
       # IMPORTANT when running in docker
       - QDRANT_URL=http://qdrant:6333
-
-      # If your indexing uses embeddings
-      - GEMINI_API_KEY=YOUR_GEMINI_KEY
-      - GEMINI_EMBED_MODEL=gemini-embedding-001
     volumes:
       - ./weights:/workspace/weights
+    depends_on:
+      - qdrant
 
   qdrant:
     image: qdrant/qdrant:latest
@@ -27,3 +25,13 @@ services:
       - "6333:6333"
     volumes:
       - ./qdrant_storage:/qdrant/storage
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    depends_on:
+      - processing
+    restart: unless-stopped
+    command: tunnel --config /etc/cloudflared/config.yml run
+    volumes:
+      - ./cloudflared/config.yml:/etc/cloudflared/config.yml:ro
+      - ./cloudflared/creds.json:/etc/cloudflared/creds.json:ro

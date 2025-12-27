@@ -13,3 +13,4 @@ numpy
 ml-collections
 pypdf
 google-genai
+scipy

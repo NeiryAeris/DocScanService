@@ -1,41 +1,24 @@
-# app/services/handwriting_service.py
 import os
+import httpx
 
 from ..schemas.handwriting import HandwritingRequest, HandwritingResponse
 from ..utils import logger
-from .handwriting_engine.pipeline import HandwritingRemovalPipeline
 
-_PIPELINE: HandwritingRemovalPipeline | None = None
-
-def _get_pipeline() -> HandwritingRemovalPipeline:
-    global _PIPELINE
-    if _PIPELINE is None:
-        device = os.getenv("HW_DEVICE", "cpu")
-        seg_ckpt = os.getenv("HW_SEGMENTER_CKPT", "")
-        inpaint = os.getenv("HW_INPAINT_WEIGHTS", "")
-        patch = int(os.getenv("HW_PATCH_SIZE", "256"))
-        overlap = int(os.getenv("HW_OVERLAP", "32"))
-        hw_class = int(os.getenv("HW_HANDWRITING_CLASS", "2"))
-
-        if not seg_ckpt or not inpaint:
-            raise RuntimeError("Missing HW_SEGMENTER_CKPT or HW_INPAINT_WEIGHTS env vars")
-
-        _PIPELINE = HandwritingRemovalPipeline(
-            device=device,
-            seg_ckpt=seg_ckpt,
-            inpaint_weights=inpaint,
-            patch_size=patch,
-            overlap=overlap,
-            handwriting_class=hw_class
-        )
-    return _PIPELINE
+WPI_HW_URL = os.getenv("WPI_HW_URL", "http://wpi_hw:8002/internal/remove-handwriting")
+INTERNAL_TOKEN = os.getenv("INTERNAL_TOKEN", "")
 
 async def remove_handwriting(req: HandwritingRequest) -> HandwritingResponse:
     try:
-        logger.info("Handwriting removal start", {"pageId": req.pageId, "jobId": req.jobId})
-        pipe = _get_pipeline()
-        data_url = await pipe.run_to_data_url(req.imageUrl)
-        return HandwritingResponse(jobId=req.jobId, status="success", cleanImageUrl=data_url)
+        logger.info("Handwriting removal proxy -> WPI", {"jobId": req.jobId, "pageId": req.pageId})
+        async with httpx.AsyncClient(timeout=300) as client:
+            r = await client.post(
+                WPI_HW_URL,
+                json=req.dict(),
+                headers={"X-Internal-Token": INTERNAL_TOKEN} if INTERNAL_TOKEN else {},
+            )
+            r.raise_for_status()
+            data = r.json()
+        return HandwritingResponse(**data)
     except Exception as e:
         logger.error("Handwriting removal failed", {"err": repr(e)})
         return HandwritingResponse(jobId=req.jobId, status="error", error=str(e))

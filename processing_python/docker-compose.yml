@@ -12,12 +12,21 @@ services:
       - HW_SEGMENTER_CKPT=/workspace/weights/segmenter/segmenter.ckpt
       - HW_INPAINT_WEIGHTS=/workspace/weights/inpaint/lbam.pth
 
+      - WPI_HW_URL=http://wpi_hw:8002/internal/remove-handwriting
+
       # IMPORTANT when running in docker
       - QDRANT_URL=http://qdrant:6333
     volumes:
       - ./weights:/workspace/weights
     depends_on:
       - qdrant
+
+  wpi_hw:
+    build: ./wpi_hw
+    image: wpi-hw:latest
+    gpus: all
+    environment:
+      - INTERNAL_TOKEN=${INTERNAL_TOKEN}
 
   qdrant:
     image: qdrant/qdrant:latest

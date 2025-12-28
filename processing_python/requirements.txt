@@ -7,10 +7,6 @@ pillow
 pytesseract
 python-multipart
 qdrant-client
-torch
-torchvision
-numpy
-ml-collections
 pypdf
 google-genai
 scipy

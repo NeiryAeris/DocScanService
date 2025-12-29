@@ -1,10 +1,11 @@
 import { Router } from "express";
 import * as documentsController from "../controllers/documents.controller";
+import { firebaseAuthMiddleware } from "../middlewares/firebase_auth.middleware";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
 export const router = Router();
 
-router.use(authMiddleware);
+router.use(firebaseAuthMiddleware);
 
 router.post("/", documentsController.createDocument);
 router.get("/", documentsController.getDocuments);

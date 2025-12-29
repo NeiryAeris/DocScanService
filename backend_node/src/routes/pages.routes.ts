@@ -17,17 +17,14 @@ const upload = multer({
   }
 });
 
-// router.use(authMiddleware);
-
-// router.post("/", pagesController.createPage);
-// router.get("/", pagesController.getPages);
-// router.get("/:id", pagesController.getPageById);
-// router.put("/:id", pagesController.updatePage);
-// router.delete("/:id", pagesController.deletePage);
-// router.post("/:pageId/ocr", pagesController.ocrPage);
-
 router.post(
   "/:pageId/ocr",
   upload.single("pageImage"),   // <- match Android field name
   pagesController.ocrPage
+);
+
+router.post(
+  "/:pageId/remove-handwriting",
+  upload.single("pageImage"), // same Android field name
+  pagesController.removeHandwritingPage
 );

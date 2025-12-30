@@ -7,10 +7,18 @@ export type UpsertOcrBody = {
   pages: { page_number: number; text: string }[];
 };
 
+export type ChatHistoryItem = {
+  role: "user" | "assistant" | "system";
+  text: string;
+};
+
 export type AskBody = {
   question: string;
   doc_ids?: string[];
   top_k?: number;
+  mode?: "auto" | "doc" | "general";
+  history?: ChatHistoryItem[];
+  min_score?: number;
 };
 
 export const upsertOcrIndex = async (userId: string, body: UpsertOcrBody) => {

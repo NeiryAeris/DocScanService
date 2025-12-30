@@ -1,7 +1,7 @@
 # app/api/v1/routers/chat_routes.py
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import List, Optional, Literal
 from fastapi import APIRouter, Depends, Header
 from pydantic import BaseModel
 
@@ -18,10 +18,19 @@ router = APIRouter(
     dependencies=[Depends(verify_internal_token)],
 )
 
+from pydantic import BaseModel, Field
+
+class HistoryItem(BaseModel):
+    role: Literal["user", "assistant", "system"] = "user"
+    text: str = Field(..., min_length=1)
+
 class AskIn(BaseModel):
     question: str
     doc_ids: Optional[List[str]] = None
-    top_k: Optional[int] = None  # allow override per request (optional)
+    top_k: Optional[int] = None
+    mode: Literal["auto", "doc", "general"] = "auto"
+    history: Optional[List[HistoryItem]] = None
+    min_score: Optional[float] = None  # override config.RAG_MIN_SCORE
 
 @router.post("/ask")
 def ask(
@@ -31,8 +40,8 @@ def ask(
     gemini = GeminiClient(
         api_key=config.GEMINI_API_KEY,
         embed_model=config.GEMINI_EMBED_MODEL,
-        chat_model=config.GEMINI_CHAT_MODEL,         # ✅ chat needed here
-        embed_dims=getattr(config, "GEMINI_EMBED_DIMS", None),  # keep consistent
+        chat_model=config.GEMINI_CHAT_MODEL,
+        embed_dims=getattr(config, "GEMINI_EMBED_DIMS", None),
     )
 
     store = QdrantStore(
@@ -41,5 +50,19 @@ def ask(
         collection=config.QDRANT_COLLECTION,
     )
 
-    rag = RAG(gemini_client=gemini, qdrant_store=store, top_k=body.top_k or config.TOP_K)
-    return rag.ask(user_id=x_user_id, question=body.question, doc_ids=body.doc_ids)
+    rag = RAG(
+        gemini_client=gemini,
+        qdrant_store=store,
+        top_k=body.top_k or config.TOP_K,
+        min_score=(body.min_score if body.min_score is not None else getattr(config, "RAG_MIN_SCORE", 0.2)),
+        general_system_prompt=getattr(config, "GENERAL_CHAT_SYSTEM_PROMPT", "You are a helpful assistant."),
+    )
+
+    history = [m.model_dump() for m in (body.history or [])] or None
+    return rag.ask(
+        user_id=x_user_id,
+        question=body.question,
+        doc_ids=body.doc_ids,
+        mode=body.mode,
+        history=history,
+    )

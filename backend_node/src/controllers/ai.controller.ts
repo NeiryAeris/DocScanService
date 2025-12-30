@@ -20,9 +20,6 @@ export const deleteDocIndex = async (req: Request, res: Response) => {
   return res.status(200).json(data);
 };
 
-import { Request, Response } from "express";
-import * as aiService from "../services/ai.service";
-
 export const askChat = async (req: Request, res: Response) => {
   const userId = (req as any).user?.id as string | undefined;
   if (!userId) return res.status(401).json({ response: null, error: "Unauthorized" });

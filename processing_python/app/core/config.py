@@ -24,6 +24,16 @@ else:
     INTERNAL_TOKEN = _token
     
     
+    
+# RAG quality threshold (if top hit score < this, treat as "no relevant docs")
+RAG_MIN_SCORE: float = float(os.getenv("RAG_MIN_SCORE", "0.2"))
+
+
+GENERAL_CHAT_SYSTEM_PROMPT: str = os.getenv(
+    "GENERAL_CHAT_SYSTEM_PROMPT",
+    "You are a helpful, friendly assistant. Answer normally and conversationally."
+)
+
 # Gemini
 GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
 GEMINI_CHAT_MODEL: str = os.getenv("GEMINI_CHAT_MODEL", "gemini-2.5-flash")

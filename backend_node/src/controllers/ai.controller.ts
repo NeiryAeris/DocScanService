@@ -20,36 +20,49 @@ export const deleteDocIndex = async (req: Request, res: Response) => {
   return res.status(200).json(data);
 };
 
+import { Request, Response } from "express";
+import * as aiService from "../services/ai.service";
+
 export const askChat = async (req: Request, res: Response) => {
   const userId = (req as any).user?.id as string | undefined;
-  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+  if (!userId) return res.status(401).json({ response: null, error: "Unauthorized" });
 
   const body: any = req.body || {};
 
-  // Accept both shapes:
-  // - new/expected: { question, doc_ids, top_k }
-  // - android-ui (current): { prompt, history, docIds, topK }
-  const question =
+  // Android sends: { prompt, history: [{role,text}...] }
+  // Python expects: { question, doc_ids?, top_k? }
+  const question: string | undefined =
     body.question ??
     body.prompt ??
     (() => {
       const h = Array.isArray(body.history) ? body.history : [];
-      // take the last user message if present
       for (let i = h.length - 1; i >= 0; i--) {
-        if (h[i]?.role === "user" && typeof h[i]?.text === "string") return h[i].text;
+        const m = h[i];
+        if (m?.role === "user" && typeof m?.text === "string" && m.text.trim()) return m.text.trim();
       }
       return undefined;
     })();
 
-  if (!question || typeof question !== "string") {
-    return res.status(400).json({ error: "Missing question (or prompt/history)" });
+  if (!question) {
+    return res.status(400).json({ response: null, error: "Missing question/prompt/history" });
   }
 
   const doc_ids = body.doc_ids ?? body.docIds ?? undefined;
   const top_k = body.top_k ?? body.topK ?? undefined;
 
-  const pythonBody = { question, doc_ids, top_k };
+  try {
+    const py = await aiService.askChat(userId, { question, doc_ids, top_k } as any);
 
-  const data = await aiService.askChat(userId, pythonBody);
-  return res.status(200).json(data);
+    // FastAPI returns { answer, citations, used_chunks }
+    const answer: string | undefined = py?.answer ?? py?.response;
+
+    if (!answer) {
+      return res.status(502).json({ response: null, error: "Upstream returned no answer" });
+    }
+
+    // ✅ return shape Android expects
+    return res.status(200).json({ response: answer, error: null });
+  } catch (e: any) {
+    return res.status(502).json({ response: null, error: e?.message || "Upstream error" });
+  }
 };

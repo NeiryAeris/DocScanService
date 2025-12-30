@@ -47,6 +47,18 @@ class QdrantStore:
         return len(points)
 
     def search(self, query_vector, user_id: str, doc_ids, top_k: int):
+        # If embedding fails or returns empty, avoid crashing
+        if not query_vector:
+            return []
+
+        # ✅ Ensure collection exists even if user chats before indexing
+        # Use query vector length as vector_size for creation (works on first call)
+        try:
+            self.ensure_collection(vector_size=len(query_vector))
+        except Exception:
+            # If Qdrant is down/misconfigured, don't crash chat endpoint
+            return []
+
         must = [qm.FieldCondition(key="user_id", match=qm.MatchValue(value=user_id))]
         if doc_ids:
             must.append(qm.FieldCondition(key="doc_id", match=qm.MatchAny(any=doc_ids)))
@@ -61,7 +73,6 @@ class QdrantStore:
                 limit=top_k,
                 with_payload=True,
             )
-            # Different versions return different shapes: normalize to a list of ScoredPoint
             return getattr(res, "points", getattr(res, "result", res))
 
         # Older clients: search()
@@ -72,6 +83,7 @@ class QdrantStore:
             with_payload=True,
             query_filter=flt,
         )
+
         
     def delete_doc(self, user_id: str, doc_id: str):
         flt = qm.Filter(

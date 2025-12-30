@@ -13,7 +13,7 @@ export const env = {
   nodeEnv: process.env.NODE_ENV || "development",
   port: Number(process.env.PORT) || 4000,
   pythonServiceUrl: required("PYTHON_SERVICE_URL"),
-  pythonInternalToken: required("PYTHON_INTERNAL_TOKEN"),
+  pythonInternalToken: process.env.PYTHON_INTERNAL_TOKEN || process.env.INTERNAL_TOKEN || (() => { throw new Error("missing required env var: PYTHON_INTERNAL_TOKEN or INTERNAL_TOKEN"); })(),
   jwtSecret: required("JWT_SECRET"),
 
   firebaseServiceAccountJson: process.env.FIREBASE_SERVICE_ACCOUNT_JSON,

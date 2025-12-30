@@ -6,6 +6,7 @@ import { router as documentRouter } from "./documents.routes";
 import { router as pageRouter } from "./pages.routes";
 import { router as aiRouter } from "./ai.routes";
 import { router as driveRouter } from "./drive.routes";
+import { router as chatRouter } from "./chat.routes";
 
 export const router = Router();
 
@@ -16,3 +17,4 @@ router.use('/documents', documentRouter);
 router.use('/pages', pageRouter);
 router.use("/ai", aiRouter);
 router.use("/drive", driveRouter);
+router.use("/chat", chatRouter);

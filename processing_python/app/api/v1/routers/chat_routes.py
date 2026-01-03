@@ -21,7 +21,9 @@ router = APIRouter(
 from pydantic import BaseModel, Field
 
 class HistoryItem(BaseModel):
-    role: Literal["user", "assistant", "system"] = "user"
+    # Android uses role="model" for assistant messages.
+    # Accept it here to avoid FastAPI returning 422.
+    role: Literal["user", "assistant", "system", "model"] = "user"
     text: str = Field(..., min_length=1)
 
 class AskIn(BaseModel):
@@ -42,6 +44,8 @@ def ask(
         embed_model=config.GEMINI_EMBED_MODEL,
         chat_model=config.GEMINI_CHAT_MODEL,
         embed_dims=getattr(config, "GEMINI_EMBED_DIMS", None),
+        max_output_tokens=getattr(config, "GEMINI_MAX_OUTPUT_TOKENS", 1024),
+        temperature=getattr(config, "GEMINI_TEMPERATURE", 0.2),
     )
 
     store = QdrantStore(
@@ -59,6 +63,11 @@ def ask(
     )
 
     history = [m.model_dump() for m in (body.history or [])] or None
+    # Normalize role "model" -> "assistant" so downstream formatting is correct.
+    if history:
+        for m in history:
+            if (m.get("role") or "").lower() == "model":
+                m["role"] = "assistant"
     return rag.ask(
         user_id=x_user_id,
         question=body.question,

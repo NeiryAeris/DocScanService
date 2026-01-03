@@ -43,7 +43,8 @@ class RAG:
             if not text:
                 continue
 
-            if role == "assistant":
+            # Android sometimes uses role="model" for assistant output
+            if role in ("assistant", "model"):
                 lines.append(f"Assistant: {text}")
             elif role == "system":
                 lines.append(f"System: {text}")
@@ -102,7 +103,8 @@ class RAG:
             page = p.get("page")
             chunk_index = p.get("chunk_index")
 
-            contexts.append(f"[doc:{title} page:{page} chunk:{chunk_index}]\n{txt}")
+            # Make context source human-readable (helps the model cite properly)
+            contexts.append(f"SOURCE: {title} (page {page})\n{txt}")
             citations.append(
                 {
                     # trả doc_id = title để phía Android không hiện id kiểu base64 nữa
@@ -144,6 +146,7 @@ class RAG:
 Rules:
 - Answer ONLY using the provided context.
 - If the answer is not in the context, say: "I can't find this in your documents."
+- Write a COMPLETE answer (do not respond with only a list of sources).
 - Cite sources inline like: (document title, page)
 
 Context:
@@ -151,6 +154,7 @@ Context:
 
 Question:
 {question}
+\nAnswer:\n
 """
 
         answer = self.gemini.generate_text(prompt)

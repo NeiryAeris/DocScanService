@@ -1,5 +1,34 @@
 import { Request, Response } from "express";
+import axios from "axios";
 import * as aiService from "../services/ai.service";
+
+/**
+ * Android chat history uses role = "model" for assistant messages.
+ * Processing service expects role in {user, assistant, system}.
+ * Normalize here so we never send invalid schema -> avoid 422.
+ */
+function normalizeHistory(
+  raw: any
+): { role: "user" | "assistant" | "system"; text: string }[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+
+  const out: { role: "user" | "assistant" | "system"; text: string }[] = [];
+  for (const m of raw) {
+    const roleRaw = String(m?.role ?? "user").toLowerCase();
+    const text = String(m?.text ?? m?.content ?? "").trim();
+    if (!text) continue;
+
+    const role: "user" | "assistant" | "system" =
+      roleRaw === "assistant" || roleRaw === "model"
+        ? "assistant"
+        : roleRaw === "system"
+        ? "system"
+        : "user";
+
+    out.push({ role, text });
+  }
+  return out.length ? out : undefined;
+}
 
 export const upsertOcrIndex = async (req: Request, res: Response) => {
   const userId = (req as any).user?.id as string | undefined;
@@ -81,12 +110,14 @@ export const askChat = async (req: Request, res: Response) => {
   const doc_ids = body.doc_ids ?? body.docIds ?? undefined;
   const top_k = body.top_k ?? body.topK ?? undefined;
 
-  // ✅ IMPORTANT: if doc_ids is provided => default to "doc" (avoid auto fallback hallucination)
+  // ✅ IMPORTANT:
+  // - if doc_ids provided => default to "doc" (RAG)
+  // - otherwise => default to "general" (pure chat, no vector search)
   const mode =
     body.mode ??
-    ((Array.isArray(doc_ids) && doc_ids.length > 0) ? "doc" : "auto");
+    ((Array.isArray(doc_ids) && doc_ids.length > 0) ? "doc" : "general");
 
-  const history = Array.isArray(body.history) ? body.history : undefined;
+  const history = normalizeHistory(body.history);
   const min_score = typeof body.min_score === "number" ? body.min_score : undefined;
 
   try {
@@ -106,6 +137,15 @@ export const askChat = async (req: Request, res: Response) => {
       used_chunks: py?.used_chunks ?? 0
     });
   } catch (e: any) {
+    // If upstream (FastAPI) rejects schema, expose it (don't mask as 502)
+    if (axios.isAxiosError(e) && e.response) {
+      return res.status(e.response.status).json({
+        response: null,
+        error: `Upstream HTTP ${e.response.status}`,
+        detail: e.response.data,
+      });
+    }
+
     return res.status(502).json({ response: null, error: e?.message || "Upstream error" });
   }
 

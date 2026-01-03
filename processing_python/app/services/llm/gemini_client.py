@@ -14,6 +14,8 @@ class GeminiClient:
         embed_model: str,
         chat_model: Optional[str] = None,
         embed_dims: Optional[int] = None,  # optional: reduce vector size (e.g., 768/1536)
+        max_output_tokens: int = 1024,
+        temperature: float = 0.2,
     ):
         if not api_key:
             raise RuntimeError("GEMINI_API_KEY is missing")
@@ -22,6 +24,8 @@ class GeminiClient:
         self._embed_model = embed_model
         self._chat_model = chat_model
         self._embed_dims = embed_dims
+        self._max_output_tokens = int(max_output_tokens or 1024)
+        self._temperature = float(temperature if temperature is not None else 0.2)
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
         if not texts:
@@ -68,8 +72,8 @@ class GeminiClient:
             model=self._chat_model,
             contents=prompt,
             config=types.GenerateContentConfig(
-                temperature=0.2,
-                max_output_tokens=512,
+                temperature=self._temperature,
+                max_output_tokens=self._max_output_tokens,
             ),
         )
         return resp.text or ""

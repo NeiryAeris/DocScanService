@@ -39,6 +39,10 @@ GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
 GEMINI_CHAT_MODEL: str = os.getenv("GEMINI_CHAT_MODEL", "gemini-2.5-flash")
 GEMINI_EMBED_MODEL: str = os.getenv("GEMINI_EMBED_MODEL","")
 
+# Gemini output controls (increase to avoid truncated answers)
+GEMINI_MAX_OUTPUT_TOKENS: int = int(os.getenv("GEMINI_MAX_OUTPUT_TOKENS", "1024"))
+GEMINI_TEMPERATURE: float = float(os.getenv("GEMINI_TEMPERATURE", "0.2"))
+
 # Qdrant
 QDRANT_URL: str = os.getenv("QDRANT_URL", "")
 QDRANT_API_KEY: str = os.getenv("QDRANT_API_KEY", "")  # optional

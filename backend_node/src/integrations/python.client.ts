@@ -3,7 +3,9 @@ import { env } from "../config/env";
 
 export const pythonClient = axios.create({
   baseURL: env.pythonServiceUrl,
-  timeout: 30000
+  // Chat/RAG can take time (vector search + LLM)
+  // Increase to avoid gateway returning 502 while processing is still working.
+  timeout: 120000
 });
 
 pythonClient.interceptors.request.use((config) => {

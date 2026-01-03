@@ -28,6 +28,13 @@ export const upsertOcrIndex = async (userId: string, body: UpsertOcrBody) => {
   return r.data;
 };
 
+export const extractPdf = async (userId: string, fileBase64: string) => {
+  const r = await pythonClient.post("/internal/extract/pdf", { fileBase64 }, {
+    headers: { "X-User-Id": userId },
+  });
+  return r.data as { total_pages: number; pages: { page_number: number; text: string }[] };
+};
+
 export const deleteDocIndex = async (userId: string, doc_id: string) => {
   const r = await pythonClient.post("/internal/index/delete_doc", { doc_id }, {
     headers: { "X-User-Id": userId },

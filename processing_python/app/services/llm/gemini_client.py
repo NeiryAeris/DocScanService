@@ -29,18 +29,32 @@ class GeminiClient:
 
         cfg = types.EmbedContentConfig(output_dimensionality=self._embed_dims) if self._embed_dims else None
 
-        # google-genai supports list input via `contents=[...]`
-        resp = self._client.models.embed_content(
-            model=self._embed_model,
-            contents=texts,
-            config=cfg,
-        )
+        BATCH = 100  # Google GenAI limit
+        out: List[List[float]] = []
 
-        embs = []
-        for e in resp.embeddings:
-            values = getattr(e, "values", e)
-            embs.append(list(values))
-        return embs
+        for start in range(0, len(texts), BATCH):
+            batch = texts[start : start + BATCH]
+
+            resp = self._client.models.embed_content(
+                model=self._embed_model,
+                contents=batch,
+                config=cfg,
+            )
+
+            embs: List[List[float]] = []
+            for e in resp.embeddings:
+                values = getattr(e, "values", e)
+                embs.append(list(values))
+
+            if len(embs) != len(batch):
+                raise RuntimeError(f"Embedding count mismatch: got {len(embs)} for {len(batch)} texts")
+
+            out.extend(embs)
+
+        if len(out) != len(texts):
+            raise RuntimeError(f"Embedding count mismatch: got {len(out)} for {len(texts)} texts")
+
+        return out
 
     def embed_query(self, text: str) -> List[float]:
         vecs = self.embed_documents([text])

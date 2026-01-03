@@ -97,14 +97,18 @@ class RAG:
             if not txt:
                 continue
 
-            doc_id = p.get("doc_id")
+            raw_doc_id = p.get("doc_id")
+            title = (p.get("title") or "").strip() or raw_doc_id  # ưu tiên title
             page = p.get("page")
             chunk_index = p.get("chunk_index")
 
-            contexts.append(f"[doc:{doc_id} page:{page} chunk:{chunk_index}]\n{txt}")
+            contexts.append(f"[doc:{title} page:{page} chunk:{chunk_index}]\n{txt}")
             citations.append(
                 {
-                    "doc_id": doc_id,
+                    # trả doc_id = title để phía Android không hiện id kiểu base64 nữa
+                    "doc_id": title,
+                    # vẫn gửi raw để debug (Android sẽ ignore field lạ)
+                    "doc_id_raw": raw_doc_id,
                     "page": page,
                     "chunk_index": chunk_index,
                     "score": float(getattr(h, "score", 0.0)),
@@ -140,7 +144,7 @@ class RAG:
 Rules:
 - Answer ONLY using the provided context.
 - If the answer is not in the context, say: "I can't find this in your documents."
-- Cite sources inline like: (doc_id, page)
+- Cite sources inline like: (document title, page)
 
 Context:
 {context_block}

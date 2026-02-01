@@ -53,7 +53,7 @@ export const supabaseAuth = (req: Request, res: Response, next: NextFunction) =>
         }
 
         const token = authHeader.slice('Bearer '.length).trim()
-        const secret = process.env.SUPABASE_JWT_TOKEN
+        const secret = process.env.supabase_jwt_secret
 
         if (!secret) {
             return res.status(500).json({error: 'SUPABASE_JWT_TOKEN is not set'})

@@ -1,9 +1,11 @@
 import { Router } from "express";
 import * as pagesController from "../controllers/pages.controller";
-import { authMiddleware } from "../middlewares/auth.middleware";
+import { supabaseAuth } from "../middlewares/auth.middleware";
 import multer from "multer";
 
 export const router = Router();
+
+router.use(supabaseAuth);
 
 const upload = multer({
   storage: multer.memoryStorage(),

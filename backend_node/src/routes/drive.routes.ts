@@ -1,6 +1,6 @@
 import { Router } from "express";
 import multer from "multer";
-import { firebaseAuthMiddleware } from "../middlewares/firebase_auth.middleware";
+import { supabaseAuth } from "../middlewares/auth.middleware";
 import * as driveController from "../controllers/drive.controller";
 
 export const router = Router();
@@ -11,11 +11,10 @@ const upload = multer({
 });
 
 // Auth-required endpoints
-router.get("/status", firebaseAuthMiddleware, driveController.status);
-router.get("/oauth2/start", firebaseAuthMiddleware, driveController.oauthStart);
-router.post("/folder/init", firebaseAuthMiddleware, driveController.initFolder);
-router.post("/upload", firebaseAuthMiddleware, upload.single("file"), driveController.upload);
-router.post("/sync", firebaseAuthMiddleware, driveController.sync);
-
+router.get("/status", supabaseAuth, driveController.status);
+router.get("/oauth2/start", supabaseAuth, driveController.oauthStart);
+router.post("/folder/init", supabaseAuth, driveController.initFolder);
+router.post("/upload", supabaseAuth, upload.single("file"), driveController.upload);
+router.post("/sync", supabaseAuth, driveController.sync);
 // Public callback endpoint (browser redirect)
 router.get("/oauth2/callback", driveController.oauthCallback);

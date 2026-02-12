@@ -1,5 +1,7 @@
-import {createApp} from '../src/app';
+// import {createApp} from '../src/app';
 
-const app = createApp();
+// const app = createApp();
 
-export default app;
+// export default app;
+
+export { default } from '../src/vercel'

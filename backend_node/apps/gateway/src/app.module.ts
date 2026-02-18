@@ -1,9 +1,10 @@
 import { Module } from "@nestjs/common";
-import { Logger, LoggerModule } from "nestjs-pino";
+import { LoggerModule } from "nestjs-pino";
 import { randomUUID } from "crypto";
 
 import { HealthModule } from "./health/health.module";
-import { single } from "rxjs";
+import { PrismaModule } from './prisma/prisma.module'
+import { NotesModule } from './notes/notes.module'
 
 @Module({
   imports: [
@@ -27,6 +28,8 @@ import { single } from "rxjs";
       },
     }),
     HealthModule,
+    PrismaModule,
+    NotesModule
   ],
 })
 export class AppModule {}

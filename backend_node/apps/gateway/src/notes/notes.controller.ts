@@ -1,10 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
-import { ApiTags } from "@nestjs/swagger";
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { CreateNodeDto } from "./dto/create-note.dto";
 import { UpdateNoteDto } from "./dto/update-note.dto";
 import { NotesService } from "./notes.service";
+import { SupabaseJwtGuard } from "../auth/supabase-jwt.guard";
 
 @ApiTags('notes')
+@ApiBearerAuth()
+@UseGuards(SupabaseJwtGuard)
 @Controller('/notes')
 export class NoteController {
     constructor(private readonly notes: NotesService) {}

@@ -13,6 +13,6 @@
     "dev:worker": "npm run dev -w apps/worker",
 
     "docker:up": "docker compose -f infra/docker-compose.yml up -d",
-    "docker:down": "docker compose -f infra/docker-compose.yml down -v"
+    "docker:down": "docker compose -f infra/docker-compose.yml down -v"    
   }
 }

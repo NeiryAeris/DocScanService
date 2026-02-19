@@ -11,4 +11,12 @@ export class HealthController {
       timestamp: new Date().toISOString(),
     };
   }
+
+  @Get("/cache-test")
+  cacheTest() {
+    return {
+      status: "ok",
+      timestamp: new Date().toISOString()
+    };
+  }
 }

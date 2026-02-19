@@ -1,16 +1,29 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { NotesRepository } from "./notes.repository";
+import { CacheService } from "../cache/cache.service";
+import { CacheKeys } from "../cache/cache.keys";
 
 @Injectable()
 export class NotesService {
-    constructor(private readonly repo: NotesRepository) {}
+    constructor(private readonly repo: NotesRepository, private readonly cache: CacheService) {}
 
     async create(input: {title: string; content?: string}) {
-        return this.repo.create(input)
+        const created = await this.repo.create(input)
+
+        await this.cache.del(CacheKeys.notesList())
+        return created
     }
 
     async list(){
-        return this.repo.findMany()
+        const key = CacheKeys.notesList()
+
+        const cached = await this.cache.getJson<unknown[]>(key)
+        if (cached) return cached
+
+        const notes = await this.repo.findMany()
+        await this.cache.setJson(key,notes, 30)
+
+        return notes
     }
 
     async get(id: string) {
@@ -21,11 +34,17 @@ export class NotesService {
 
     async update(id: string, input: {title?: string, content?: string}) {
         await this.get(id)
-        return this.repo.update(id, input)
+        const updated = this.repo.update(id, input)
+        await this.cache.del(CacheKeys.notesList())
+
+        return updated
     }
 
     async remove(id: string) {
         await this.get(id)
-        return this.repo.delete(id)
+        const removed = this.repo.delete(id)
+        await this.cache.del(CacheKeys.notesList())
+
+        return removed
     }
 }

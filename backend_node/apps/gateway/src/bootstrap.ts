@@ -35,12 +35,12 @@ export async function configureApp(app: INestApplication) {
         SwaggerModule.setup('docs', app, doc);
     }
 
-    //Legacy express app
-    const httpAdapter = app.getHttpAdapter();
-    const expressInstance = httpAdapter.getInstance() as Express;
+    // //Legacy express app
+    // const httpAdapter = app.getHttpAdapter();
+    // const expressInstance = httpAdapter.getInstance() as Express;
     
-    // const legacy = loadLegacyMiddleware()
-    expressInstance.use(legacyApp);
+    // // const legacy = loadLegacyMiddleware()
+    // expressInstance.use(legacyApp);
 
     return app
 }
